@@ -7,7 +7,9 @@
 
 **Lumav Commerce** is an Estonian company based in Tallinn, Estonia.
 
-![image](https://github.com/user-attachments/assets/c32b328e-5fb8-44cf-a5e5-c9c182aa7abc)
+<div align="center">
+  ![image](https://github.com/user-attachments/assets/c32b328e-5fb8-44cf-a5e5-c9c182aa7abc)
+</div>
 
 Lumav Commerce develops online stores and complete e-commerce solutions.
 
