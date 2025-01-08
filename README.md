@@ -45,7 +45,7 @@ Other pages of the project:
 
 3. SingUp page (ENG, EST, RUS)
 
-![image](https://github.com/user-attachments/assets/cf5aa40e-f490-4496-bc64-7972271393ea)
+![image](https://github.com/user-attachments/assets/e9819eb0-1a62-427f-af15-d3449b892f8e)
 
 ![image](https://github.com/user-attachments/assets/d572123b-7652-48c6-9ffc-4b805a01aec8)
 
