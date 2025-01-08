@@ -1,6 +1,6 @@
 # Kodulugu
 
-**Kodulugu _(Mööblipood)_** is a project created during a 3-month internship at **Lumav Commerce**.
+**Kodulugu _(ehk Mööblipood)_** is a project created during a 3-month internship at **Lumav Commerce**.
 
 
 ## Lumav
