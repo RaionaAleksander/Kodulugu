@@ -51,3 +51,5 @@ Other pages of the project:
 
 ![image](https://github.com/user-attachments/assets/bd4dde52-a661-47d9-bb56-b86e1578039b)
 
+
+Unfortunately, after leaving the practice it is no longer possible to register there, so it is not possible to show the rest of the pages.
