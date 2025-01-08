@@ -1,0 +1,10 @@
+{{ define "kodulugu-product-item-partial" }}
+    <div class="product-item">
+        <a href="kodulugu-product-page.html?id={{.id}}" class="product-link">
+            <img src='{{ .cdnURL }}/images/{{ .clientCode }}/{{ .imageKey }}' 
+             alt="{{.image}} image">
+            <h3>{{.name}}</h3>
+            <p>{{ .price_name }}: {{.price}}</p>
+        </a>
+    </div>
+{{ end }}

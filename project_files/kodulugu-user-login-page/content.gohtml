@@ -1,0 +1,47 @@
+{{ template "kodulugu-template-page-layout" . }}
+
+{{ define "title-block" }}
+    {{ .Translation.Get "Log In" }}
+{{ end }}
+
+{{ define "css-block" }}
+    <link rel="stylesheet" href="{{ "kodulugu-register-login-css" | staticFileLink }}">
+{{ end }}
+
+{{ define "content-block" }}
+    <main class="main-content">
+        <div class="reg-log-container">
+            {{ if .Session.Customer.ID }}
+                <h2 class="auth_user" >{{ .Translation.Get "Welcome" }}, {{ .Session.Customer.FirstName }}!</h2>
+            {{ else }}
+                <h2 class="unauth_user" >{{ .Translation.Get "Log In" }}</h2>
+                <form method="post">
+                    <input type="hidden" name="AccountAdminApi.Api.Post.migrateUsers" value="v1/app-user/migrate">
+                    <input type="hidden" name="AccountAdminApi.Api.Json.migrateUsers.string.authDomain" value="{{ .Tools.B2bAuthDomain }}" data-preset-val="">
+
+                    <label for="username">{{ .Translation.Get "E-mail" }}</label>
+                    <input type="text" id="js__username" 
+                    name="AutomatApi.B2BLoginInput.Username" 
+                    placeholder={{ .Translation.Get "Enter your e-mail address" }} required
+                    pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}">
+
+                    <label for="password">{{ .Translation.Get "Password" }}</label>
+                    <input type="password" id="js__login-password" 
+                    name="AutomatApi.B2BLoginInput.Password" 
+                    placeholder={{ .Translation.Get "Enter your password" }} required
+                    minlength="10" maxlength="20">
+
+                    <!-- Read login errors -->
+                    <div class="my-error-container">
+                        {{ range .Data.Errors }}
+                        <span class="my-error-message">{{ . }}</span>
+                        {{ end }}
+                    </div>
+
+                    <button class="submit-button" type="submit">{{ .Translation.Get "Log In" }}</button>
+                </form>
+                <p class="register-link">{{ .Translation.Get "No account yet?" }} <a href="kodulugu-user-register-page.html">{{ .Translation.Get "Sign up here" }}</a></p>
+            {{ end }}
+        </div>
+    </main>
+{{ end }}

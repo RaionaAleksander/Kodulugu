@@ -1,0 +1,102 @@
+{{ define "kodulugu-cart-panel-partial" }}
+
+<input type="hidden" name="InventoryDocumentsApi.Api.Post.initShoppingCart|2" data-preset-val="v1/shopping-cart">
+<input type="hidden" name="InventoryDocumentsApi.Api.Json.initShoppingCart.string.<-cartId" data-preset-val="Session.customer.ID">
+<input type="hidden" name="InventoryDocumentsApi.Api.Json.initShoppingCart.number.<-?customerId" data-preset-val="Session.customer.ID">
+
+<!---<input type="hidden" name="InventoryDocumentsApi.Api.Json.initShoppingCart.number.<-?warehouseId" data-preset-val="Session.customer.ID">--->
+
+<input type="hidden" name="PIMApi.Api.Get.myRequestCartProducts|3" value="v1/product" data-preset-val="v1/product">
+
+<input type="hidden" name="CDNApi.Api.Get.myRequestCartImages|3" value="images" data-preset-val="images"> 
+<input type="hidden" name="CDNApi.Api.Query.myRequestCartImages.context" data-preset-val="erply-product">
+<input type="hidden" name="CDNApi.Api.Query.myRequestCartImages.isDeleted" data-preset-val="false">
+
+{{ $currentName := printf "name.%s" $.Session.Language.Code }}
+
+{{ with $.Data.InventoryDocumentsApi.Api.Requests.initShoppingCart.Response }}
+  {{ $rows := (.Get "rows").Array }}
+
+  {{ if gt (len $rows) 0}}
+    <div id="cart-panel" class="cart-panel">
+      <div class="cart-header">
+        <h3>{{ $.Translation.Get "Cart" }}</h3>
+        <p class="cart-total-cost"><b>Total cost:</b>&nbsp;<span id="js__total-cost"></span>&nbsp;€</p>
+      </div>
+      <div class="cart-items">
+        <!-- here will be products -->
+        {{ range $rows }}
+          {{ $productID := (.Get "productId")}}
+          {{ $productAmount := (.Get "amount")}}
+
+          {{ $productName := "" }}
+          {{ $productPrice := "" }}
+
+          {{ range $.Data.PIMApi.Api.Requests.myRequestCartProducts.Response.Array }}
+            {{ if eq (.Get "id").Int ($productID).Int }}
+              {{ $productName = .Get $currentName }}
+              {{ $productPrice = .Get "price_with_tax" }}
+            {{ end}}
+          {{ end }}
+
+          {{ $imageKey := "" }}
+
+          {{ with $.Data.CDNApi.Api.Requests.myRequestCartImages.Response }}
+            {{ range (.Get "images").Array }}
+              {{ if eq (.Get "productId").Int $productID.Int }}
+                {{ $imageKey = .Get "key" }}
+              {{ end }}
+            {{ end }}
+          {{ end }}
+
+          <div class="cart-item-block">
+            <a class="cart-item-link" href="kodulugu-product-page.html?id={{ $productID }}">
+              <p class="cart-info"><b>{{ $productName }}</b></p>
+              <p class="cart-info"><b>€&nbsp;<span class="js__cart-product-price">{{ $productPrice }}</span></b></p>
+
+              <img class="cart-image" src='{{ $.Session.Services.CDNApi.URL }}/images/{{ $.Session.ClientCode }}/{{ $imageKey }}' 
+                alt="Product {{ $productID }}">
+            </a>
+
+            <form class="cart-actions" method="post">
+              <input type="hidden" name="InventoryDocumentsApi.Api.Patch.updateProduct" value="v1/shopping-cart/{cartId}/product">
+              <input type="hidden" name="InventoryDocumentsApi.Api.Path.updateProduct.cartId" value="{{ $.Data.InventoryDocumentsApi.Api.Requests.initShoppingCart.Response.Get "cartId" }}">
+              <input type="hidden" name="InventoryDocumentsApi.Api.Json.updateProduct.number.productId" value="{{ $productID }}">
+              <input type="hidden" class="js__product-amount" name="InventoryDocumentsApi.Api.Json.updateProduct.number.amount" value="{{ $productAmount }}">
+
+              <button class="cart-action-button increase-btn" data-product-id="{{ $productID }}" type="submit">+</button>
+              <span class="cart-info js__cart-product-amount">{{ $productAmount }}</span>
+
+              {{ if eq $productAmount.Int 1 }}
+                <button class="cart-action-button nothing-decrease-btn" data-product-id="{{ $productID }}" disabled>-</button>
+              {{ else }}
+                <button class="cart-action-button decrease-btn" data-product-id="{{ $productID }}" type="submit">-</button>
+              {{ end }}
+
+              <button class="cart-action-button remove-btn" data-product-id="{{ $productID }}" type="submit">Remove</button>
+            </form>
+          </div>
+        {{ end }}
+      </div>
+      <div class="cart-footer">
+        <form id="js__cart-delete-form" method="post">
+          <input type="hidden" name="InventoryDocumentsApi.Api.Put.updateShoppingCart" value="v1/shopping-cart/{cartId}">
+          <input type="hidden" name="InventoryDocumentsApi.Api.Path.updateShoppingCart.<-cartId" value="Session.customer.ID">
+          <input type="hidden" name="InventoryDocumentsApi.Api.Json.updateShoppingCart.number.<-customerId" value="Session.customer.ID">
+          <input type="hidden" name="InventoryDocumentsApi.Api.Json.updateShoppingCart.json.rows" value="[]">
+          <!---<input type="hidden" name="InventoryDocumentsApi.Api.Json.updateShoppingCart.number.warehouseId" data-preset-val="0">-->
+
+          <button id="js__cart-delete-submit" class="cart-footer-button delete-items-btn" type="submit">{{ $.Translation.Get "Delete all" }}</button>
+        </form>
+        <a href="kodulugu-payment-page.html" class="cart-footer-button checkout-btn">{{ $.Translation.Get "Go to cart" }}</a>
+      </div>
+    </div>
+
+    <button id="toggle-cart" class="toggle-cart-btn">&rarr;</button>
+  {{ end }}
+{{ end }}
+
+<script src="{{ staticFileLink "kodulugu-cart-automation-js" }}"></script>
+<script src="{{ staticFileLink "kodulugu-browser-history-fix-js" }}"></script>
+
+{{ end }}

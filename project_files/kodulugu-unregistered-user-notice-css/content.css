@@ -1,0 +1,27 @@
+/* Registreerimata kasutaja teade */
+
+.unregistered-context {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	flex: 1;
+}
+
+.unregistered-user-notice {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 20px;
+    max-width: 800px;
+    width: 90%;
+}
+
+.unregistered-user-notice img {
+    width: 100px;
+    height: auto;
+}
+
+.unregistered-user-notice p {
+	margin-top: 10px;
+}

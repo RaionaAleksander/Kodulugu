@@ -1,0 +1,128 @@
+{{ template "kodulugu-template-page-layout" . }}
+
+{{ define "title-block" }}
+    {{ .Translation.Get "User profile" }}
+{{ end }}
+
+{{ define "css-block" }}
+    <link rel="stylesheet" href="{{ "kodulugu-unregistered-user-notice-css" | staticFileLink}}">
+    <link rel="stylesheet" href="{{ "kodulugu-profile-page-css" | staticFileLink}}">
+{{ end }}
+
+{{ define "cart-panel-block" }}
+    {{ template "kodulugu-cart-panel-partial" . }}
+{{ end }}
+
+{{ define "content-block" }}
+    {{ if .Session.Customer.ID }}
+        <main class="main-content">
+            <div class="section-container">
+                <h2>{{ .Translation.Get "Profile information" }}</h2>
+
+                <!---{{ toJson .Session.Customer }}--->
+
+                <input type="hidden" name="CRMApi.Api.Get.myRequestCustomer" value="v1/customers/individuals" data-preset-val="v1/customers/individuals">
+                <input type="hidden" name="CRMApi.Api.Query.myRequestCustomer.<-ids" data-preset-val="Session.customer.ID">
+
+                {{ $customerID := .Session.Customer.ID }}
+                {{ $userDomain := .Session.Customer.AuthDomain }}
+
+                {{ $userData := $.Data.CRMApi.Api.Requests.myRequestCustomer.Response.Get "0"}}
+
+                <!---{{ $userData }}--->
+
+                <input type="hidden" name="ErplyApi.Api.Post.getSessionKeyUser" value="getSessionKeyUser" data-preset-val="getSessionKeyUser">            
+
+                {{ $sessionKey := .Data.ErplyApi.Api.Requests.getSessionKeyUser.Response.Get "records.0.sessionKey" }}
+
+                <div class="profile-info">
+                    <div class="profile-item">
+                        <label for="user-fullname">{{ .Translation.Get "Full name" }}:</label>
+                        <span id="user-fullname">{{ .Session.Customer.FirstName }} {{ .Session.Customer.LastName }}</span>
+                    </div>
+                    <div class="profile-item">
+                        <label for="user-email">{{ .Translation.Get "E-mail" }}:</label>
+                        <span id="user-email">{{ .Session.Customer.Username }}</span>
+                    </div>
+                    <div class="profile-item">
+                        <label for="user-registration">{{ .Translation.Get "Date of registration" }}:</label>
+                        <span id="user-registration">
+                            {{ unixToDate ($userData.Get "added").String (.Data.ErplyApi.ConfigurationList.timezone) "2006-02-01"}}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-container">
+                <h2>{{ .Translation.Get "Additional information" }}</h2>
+
+                <div class="profile-info">
+                    <div class="profile-item">
+                        <label for="user-phone">{{ .Translation.Get "Phone" }}:</label>
+                        <span id="user-phone">{{ $userData.Get "phone" }}</span>
+                    </div>
+                </div>
+
+
+
+
+            </div>
+
+            <div class="section-container">
+                <h2>{{ .Translation.Get "Change password" }}</h2>
+                <p>{{ .Translation.Get "Here you can change your password." }} {{ .Translation.Get "Please enter your old password and your new password." }}</p>
+
+                <form method="PUT" id="js__password__form" class="js__changePasswordForm">
+                    <input type="hidden" id="clientCode" value={{ $.Session.ClientCode }}>
+                    <input type="hidden" id="sessionKey" value={{ $sessionKey }}>
+
+
+                        <div class="form-row">
+                        <div class="form-item">
+                            <label for="oldPassword">{{ .Translation.Get "Enter old password" }}</label>
+                            <input type="password" id="oldPassword" name="oldPassword" 
+                            class="input-field js__OldPassword"
+                            required minlength="8" maxlength="20" 
+                            pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" 
+                            placeholder={{ .Translation.Get "Enter old password" }} autocomplete="off">
+                        </div>
+
+                        <div class="form-column">
+                            <div class="form-item">
+                                <label for="newPassword">{{ .Translation.Get "Enter new password" }}</label>
+                                <input type="password" id="newPassword" name="newPassword" 
+                                class="input-field js__changePasswordAutomationPassword"
+                                required minlength="8" maxlength="20"
+                                pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
+                                placeholder={{ .Translation.Get "Enter new password" }} autocomplete="off">
+                            </div>
+                            
+                            <div class="form-item">
+                                <label for="confirmPassword">{{ .Translation.Get "Confirm new password" }}</label>
+                                <input type="password" id="confirmPassword" name="confirmPassword"
+                                class="input-field js__changePasswordAutomationPasswordConfirm" 
+                                required minlength="8" maxlength="20"
+                                pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
+                                placeholder={{ .Translation.Get "Confirm new password" }} autocomplete="off">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="button-container">
+                        <button type="submit" class="submit-btn">{{ .Translation.Get "Change" }}</button>
+                    </div>
+
+                    <div class="my-error-container">
+                        <span class="js__my-error-message"></span>
+                    </div>
+                </form>
+            </div>
+        </main>
+    {{ else }}
+        {{ template "kodulugu-unregistered-user-notice-partial" . }}
+    {{ end }}
+{{ end }}
+
+{{ define "js-block" }}
+    <script src="{{ staticFileLink "kodulugu-user-change-password-automation-js" }}"></script>
+{{ end }}

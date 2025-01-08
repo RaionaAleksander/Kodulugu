@@ -1,0 +1,30 @@
+{{ template "kodulugu-template-page-layout" . }}
+
+{{ define "title-block" }}
+    Tellimused
+{{ end }}
+
+{{ define "css-block" }}
+    <link rel="stylesheet" href="{{ "kodulugu-unregistered-user-notice-css" | staticFileLink}}">
+{{ end }}
+
+{{ define "cart-panel-block" }}
+    {{ template "kodulugu-cart-panel-partial" . }}
+{{ end }}
+
+{{ define "content-block" }}
+    {{ if .Session.Customer.ID }}
+        <main class="main-content">
+            <section class="section-container">
+                <h1>Teie aktiivsed tellimused</h1>
+                <p></p>
+            </section>
+
+            <section class="section-container">
+                <h2>Teie nimekiri:</h2>
+            </section>
+        </main>
+    {{ else }}
+        {{ template "kodulugu-unregistered-user-notice-partial" . }}
+    {{ end }}
+{{ end }}

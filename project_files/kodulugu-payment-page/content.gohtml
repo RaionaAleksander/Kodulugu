@@ -1,0 +1,175 @@
+{{ template "kodulugu-template-page-layout" . }}
+
+{{ define "title-block" }}
+    {{ $.Translation.Get "Payment" }}
+{{ end }}
+
+{{ define "css-block" }}
+    <link rel="stylesheet" href="{{ "kodulugu-unregistered-user-notice-css" | staticFileLink}}">
+    <link rel="stylesheet" href="{{ "kodulugu-payment-page-css" | staticFileLink }}"> 
+{{ end }}
+
+{{ define "content-block" }}
+    {{ if .Session.Customer.ID }}
+        <input type="hidden" name="InventoryDocumentsApi.Api.Post.initShoppingCart|2" data-preset-val="v1/shopping-cart">
+        <input type="hidden" name="InventoryDocumentsApi.Api.Json.initShoppingCart.string.<-cartId" data-preset-val="Session.customer.ID">
+        <input type="hidden" name="InventoryDocumentsApi.Api.Json.initShoppingCart.number.<-?customerId" data-preset-val="Session.customer.ID">
+
+        <input type="hidden" name="PIMApi.Api.Get.myRequestCartProducts|3" value="v1/product" data-preset-val="v1/product">
+
+        <input type="hidden" name="CDNApi.Api.Get.myRequestCartImages|3" value="images" data-preset-val="images"> 
+        <input type="hidden" name="CDNApi.Api.Query.myRequestCartImages.context" data-preset-val="erply-product">
+        <input type="hidden" name="CDNApi.Api.Query.myRequestCartImages.isDeleted" data-preset-val="false">
+
+        <main class="main-content">
+            <section class="section-container">
+                <h1>{{ $.Translation.Get "Payment" }}</h1>
+                {{ $currentName := printf "name.%s" $.Session.Language.Code }}
+                {{ with $.Data.InventoryDocumentsApi.Api.Requests.initShoppingCart.Response }}
+                    {{ $rows := (.Get "rows").Array }}
+
+                    {{ if gt (len $rows) 0}}
+                        <div class="payment-cart-container">
+                            <div class="payment-cart-items">
+                                <hr>
+                                {{ range $rows }}
+                                    {{ $productID := (.Get "productId")}}
+                                    {{ $productAmount := (.Get "amount")}}
+
+                                    {{ $productName := "" }}
+                                    {{ $productPrice := "" }}
+
+                                    {{ range $.Data.PIMApi.Api.Requests.myRequestCartProducts.Response.Array }}
+                                        {{ if eq (.Get "id").Int ($productID).Int }}
+                                        {{ $productName = .Get $currentName }}
+                                        {{ $productPrice = .Get "price_with_tax" }}
+                                        {{ end}}
+                                    {{ end }}
+
+                                    {{ $imageKey := "" }}
+
+                                    {{ with $.Data.CDNApi.Api.Requests.myRequestCartImages.Response }}
+                                        {{ range (.Get "images").Array }}
+                                        {{ if eq (.Get "productId").Int $productID.Int }}
+                                            {{ $imageKey = .Get "key" }}
+                                        {{ end }}
+                                        {{ end }}
+                                    {{ end }}
+
+                                    <div class="payment-cart-item">
+                                        <div class="payment-cart-item-left">
+                                            <a class="payment-cart-item-link" href="kodulugu-product-page.html?id={{ $productID }}">
+                                                <img class="payment-cart-image" src='{{ $.Session.Services.CDNApi.URL }}/images/{{ $.Session.ClientCode }}/{{ $imageKey }}' 
+                                                    alt="Product {{ $productID }}">
+                                            </a>
+                                        </div>
+                                        <div class="payment-cart-item-right">
+                                            <a class="payment-cart-item-link" href="kodulugu-product-page.html?id={{ $productID }}">
+                                                <p class="payment-cart-item-name">{{ $productName }}</p>
+                                            </a>
+                                            <p class="payment-cart-item-price"><span class="js__payment-cart-item-price">{{ $productPrice }}</span>&nbsp;€</p>
+                                            <form class="payment-cart-actions" method="post">
+                                                <div class="payment-cart-item-ammount-container">
+                                                    <input type="hidden" name="InventoryDocumentsApi.Api.Patch.updateProduct" value="v1/shopping-cart/{cartId}/product">
+                                                    <input type="hidden" name="InventoryDocumentsApi.Api.Path.updateProduct.cartId" value="{{ $.Data.InventoryDocumentsApi.Api.Requests.initShoppingCart.Response.Get "cartId" }}">
+                                                    <input type="hidden" name="InventoryDocumentsApi.Api.Json.updateProduct.number.productId" value="{{ $productID }}">
+                                                    <input type="hidden" class="js__payment-product-amount" name="InventoryDocumentsApi.Api.Json.updateProduct.number.amount" value="{{ $productAmount }}">
+
+                                                    {{ if eq $productAmount.Int 1 }}
+                                                        <button class="amount-btn nothing-decrement-btn" data-product-id="{{ $productID }}" disabled>-</button>
+                                                    {{ else }}
+                                                        <button class="amount-btn decrement-btn" data-product-id="{{ $productID }}" type="submit">-</button>
+                                                    {{ end }}
+                                                    <span class="js__payment-cart-item-ammount">{{ $productAmount }}</span>
+                                                    <button class="amount-btn increment-btn" data-product-id="{{ $productID }}" type="submit">+</button>
+                                                    <button class="delete-btn" data-product-id="{{ $productID }}" type="submit">Remove</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                    <hr>
+                                {{ end }}
+                            </div>
+                            <div class="payment-cart-information">
+                                <p>{{ $.Translation.Get "Subtotal" }} (<span id="js__payment-total-items">0</span> {{ $.Translation.Get "items" }}): <b>€<span id="js__payment-total-price">0</span></b></p>
+                            </div>
+                        </div>
+
+                        <br>
+
+                        <div class="payment-form">
+                            <h2><u>{{ $.Translation.Get "Buy goods" }}</u></h2>
+                            <br>
+                            <form id="js__payment-form" method="post">
+                                <h3>{{ $.Translation.Get "Location" }}</h3>
+
+                                <input type="hidden" name="CRMApi.Api.Post.createAddress" value="v1/addresses">
+                                <input type="hidden" name="CRMApi.Api.Json.createAddress.number.<-customerId" value="Session.Customer.ID">
+
+                                <div class="form-group">
+                                    <label for="country">{{ $.Translation.Get "Country" }}:</label>
+                                    <input type="text" id="country" name="country" placeholder="{{ $.Translation.Get "Enter your country" }}" required>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="city">{{ $.Translation.Get "City" }}:</label>
+                                    <input type="text" id="city" name="city" placeholder="{{ $.Translation.Get "Enter your city" }}" required>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="postal-code">{{ $.Translation.Get "Postal Code" }}:</label>
+                                    <input type="text" id="postal-code" name="postal-code" placeholder="{{ $.Translation.Get "Enter your postal code" }}" required>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="street">{{ $.Translation.Get "Street" }}:</label>
+                                    <input type="text" id="street" name="street" placeholder="{{ $.Translation.Get "Enter your street name" }}" required>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="house">{{ $.Translation.Get "House" }}:</label>
+                                    <input type="text" id="house" name="house" placeholder="{{ $.Translation.Get "Enter your house number" }}" required>
+                                </div>
+
+                                <h3>{{ $.Translation.Get "Phone" }}</h3>
+
+                                <div class="form-group">
+                                    <label for="phone">{{ $.Translation.Get "Phone number" }}:</label>
+                                    <input type="tel" id="phone" name="phone" placeholder="(+372) 1234 5678" required>
+                                </div>
+
+                                <!---<div class="form-group">
+                                    <label for="location">{{ $.Translation.Get "Location" }}:</label>
+                                    <input type="text" id="location" name="location" placeholder="Tallinn, Estonia" required>
+                                </div>--->
+
+                                <!---<div class="form-group">
+                                    <label for="payment-method">Makseviis:</label>
+                                    <select id="payment-method" name="payment-method">
+                                        <option value="card">Panga kaart</option>
+                                        <option value="transfer">Pangaülekanne</option>
+                                        <option value="cash">Sularahas</option>
+                                    </select>
+                                </div>--->
+
+                                <button class="product-submit-button" type="submit">{{ $.Translation.Get "Buy" }}</button>
+                            </form>
+
+                        </div>
+
+                    {{ else }}
+                        <br>
+                        <p>{{ $.Translation.Get "Cart is empty" }}</p>
+                    {{ end }}
+                {{ end }}
+            </section>
+        </main>
+    {{ else }}
+        {{ template "kodulugu-unregistered-user-notice-partial" . }}
+    {{ end }}
+{{ end }}
+
+{{ define "js-block" }}
+    <script src="{{ staticFileLink "kodulugu-payment-page-script-js" }}"></script>
+    <script src="{{ staticFileLink "kodulugu-browser-history-fix-js" }}"></script>
+{{ end }}

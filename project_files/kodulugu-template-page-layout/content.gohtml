@@ -1,0 +1,38 @@
+{{ define "kodulugu-template-page-layout" }}
+
+<!doctype html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport"
+            content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <link rel="stylesheet" href="{{ "kodulugu-general-css" | staticFileLink }}">
+        <link rel="stylesheet" href="{{ "kodulugu-navbar-css" | staticFileLink}}">
+        <link rel="stylesheet" href="{{ "kodulugu-footer-css" | staticFileLink}}">
+        <link rel="stylesheet" href="{{ "kodulugu-cart-css" | staticFileLink }}">
+        {{ block "css-block" . }} {{ end }}
+        <title>
+            {{ block "title-block" . }} {{ end }}
+        </title>
+    </head>
+    <body>
+        {{ template "kodulugu-navbar-partial" . }}
+
+        {{ if .Session.Customer.ID }}
+            {{ block "cart-panel-block" . }} {{ end }}
+        {{ end }}
+
+        {{ block "content-block" . }} {{ end }}
+
+        {{ template "kodulugu-footer-partial" . }}
+
+        <input type="hidden" id="AUT_SESSION" value="{{ toJson .Session }}">
+        <input type="hidden" id="REQUEST_STATS" value="{{ toJson .Data.RequestStats }}">
+
+        <script src="/assets/js/automat.deps.js" type="application/javascript"></script>
+        <script src="/assets/js/menu.bundle.js" type="application/javascript"></script>
+
+        {{ block "js-block" . }} {{ end }}
+    </body>
+</html>
+{{ end }}

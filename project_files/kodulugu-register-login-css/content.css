@@ -1,0 +1,81 @@
+main {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	margin: 0;
+}
+
+.reg-log-container {
+	background-color: rgb(80, 80, 80);
+	padding: 40px;
+	border: 1px solid rgb(50, 50, 50);
+	border-radius: 10px;
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+	max-width: 400px;
+	width: 100%;
+	text-align: center;
+}
+
+h2 {
+	font-size: 24px;
+	color: rgb(255, 191, 135);
+}
+
+.unauth_user, .second-h2-headers {
+	margin-bottom: 20px;
+}
+
+label {
+	display: block;
+	text-align: left;
+	margin-bottom: 5px;
+	color: rgb(255, 191, 135);
+}
+
+input {
+	width: 100%;
+	padding: 10px;
+	margin-bottom: 15px;
+	border: 1px solid rgb(255, 191, 135);
+	border-radius: 5px;
+	font-size: 16px;
+}
+
+.submit-button {
+	width: 100%;
+	padding: 10px;
+	background-color: #28a745;
+	border: none;
+	border-radius: 5px;
+	color: black;
+	font-size: 16px;
+	cursor: pointer;
+}
+
+.submit-button:hover {
+	background-color: #218838;
+}
+
+.register-link, .login-link {
+	display: block;
+	margin-top: 15px;
+	font-size: 14px;
+}
+
+.register-link a, .login-link a {
+	color: #007bff;
+	text-decoration: none;
+}
+
+.register-link a:hover, .login-link a:hover {
+	text-decoration: underline;
+}
+
+.my-error-container {
+	color: red;
+	margin-bottom: 10px;
+}
+
+.error {
+	color: darkred;
+}

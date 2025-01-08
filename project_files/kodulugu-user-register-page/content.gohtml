@@ -1,0 +1,86 @@
+{{ template "kodulugu-template-page-layout" . }}
+
+{{ define "title-block" }}
+    {{ .Translation.Get "Register" }}
+{{ end }}
+
+{{ define "css-block" }}
+    <link rel="stylesheet" href="{{ "kodulugu-register-login-css" | staticFileLink }}">
+{{ end }}
+
+{{ define "content-block" }}
+    <main class="main-content">
+        <div class="reg-log-container">
+            {{ if .Session.Customer.ID }}
+                <h2 class="auth_user" >{{ .Translation.Get "Already registered" }}</h2>
+            {{ else }}
+                <h2 class="unauth_user" >{{ .Translation.Get "New user registration" }}</h2>
+                <form method="post" id="js__register-form">
+                    <input type="hidden" name="postActionEntity" value="addIndividualCustomerPassword">
+                    <input type="hidden" name="postActionRedirect" value="{{ .Tools.GetNavPath "kodulugu-user-login-page" }}{{ if .Data.AutomatApi.Api.Requests.addIndividualCustomerPassword.Response }}?registrationSuccess=true{{ end }}">
+
+                    <input type="hidden" name="CRMApi.Api.Get.customerGroups" value="v1/customers/groups" data-preset-val="v1/customers/groups">
+                    <input type="hidden" name="CRMApi.Api.Query.customerGroups.take" value="" data-preset-val="50">
+
+                    {{ $gId := (.Data.CRMApi.Api.Requests.customer.Json.Get "customerGroupId").Int }}
+
+                    <input type="hidden" name="CRMApi.Api.Post.createIndividualCustomer" value="v1/customers/individuals">
+
+                    <input type="hidden" name="CRMApi.Api.Post.createAddress|1" value="v1/addresses">
+                    <input type="hidden" name="CRMApi.Api.Json.createAddress.number.<-customerId" value="createIndividualCustomer.Response.id">
+                    <input type="hidden" name="CRMApi.Api.Json.createAddress.number.typeId" value="1">
+
+                    <input type="hidden" name="CustomApi.Api.Post.addIndividualCustomerPassword|1" value="https://automat-us.erply.com/public/{clientCode}/en/kodulugu-set-password-page.json">
+                    <input type="hidden" name="CustomApi.Api.PostParam.addIndividualCustomerPassword.<-id" value="createIndividualCustomer.Response.id">
+                    <input type="hidden" name="CustomApi.Api.Path.addIndividualCustomerPassword.<-clientCode" value="Session.clientCode">
+
+                    <select class="hidden" name="CRMApi.Api.Json.createIndividualCustomer.number.customerGroupId">
+                        {{ range $cg := .Data.CRMApi.Api.Requests.customerGroups.Response.Array }}
+                            <option value="{{ $cg.Get "id" }}" {{ if eq ($cg.Get "id").Int $gId }}selected{{ end }}>
+                                {{ $cg.Get "name.en" }}
+                            </option>
+                        {{ end }}
+                    </select>
+
+                    <label for="email">{{ .Translation.Get "E-mail" }}</label>
+                    <input type="email" id="js__email" name="CRMApi.Api.Json.createIndividualCustomer.string.mail" placeholder={{ .Translation.Get "Enter your e-mail address" }} 
+                    required pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}" autocomplete="off">
+                    <span class="error" id="js__email-error"></span>
+
+                    <label for="password">{{ .Translation.Get "Password" }}</label>
+                    <input type="password" id="js__password" name="CustomApi.Api.PostParam.addIndividualCustomerPassword.password" placeholder={{ .Translation.Get "Enter your password" }} 
+                    required minlength="8" maxlength="20" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" autocomplete="off">
+                    <span class="error" id="js__password-error"></span>
+
+                    <label for="firstName">{{ .Translation.Get "First name" }}</label>
+                    <input type="text" id="js__first-name" name="CRMApi.Api.Json.createIndividualCustomer.string.firstName" 
+                    placeholder={{ .Translation.Get "Enter your first name" }} required pattern="[A-Za-zÄäÖöÜüÕõŠšŽž'-]{2,}">
+                    <span class="error" id="js__first-name-error"></span>
+
+                    <label for="lastName">{{ .Translation.Get "Last name" }}</label>
+                    <input type="text" id="js__last-name" name="CRMApi.Api.Json.createIndividualCustomer.string.lastName" 
+                    placeholder={{ .Translation.Get "Enter your surname" }} required pattern="[A-Za-zÄäÖöÜüÕõŠšŽž'-]{2,}">
+                    <span class="error" id="js__last-name-error"></span>
+
+                    <label for="phone">{{ .Translation.Get "Phone" }}</label>
+                    <input type="tel" id="js__phone" name="CRMApi.Api.Json.createIndividualCustomer.string.phone"
+                    placeholder={{ .Translation.Get "Enter your phone" }} required pattern="\+\d{10,15}"> 
+
+                    <div class="my-error-container">
+                        {{ range .Data.Errors }}
+                        <span class="my-error-message">{{ . }}</span>
+                        {{ end }}
+                    </div>
+
+                    <button class="submit-button" type="submit">{{ .Translation.Get "Register" }}</button>
+                </form>
+
+                <p class="login-link">{{ .Translation.Get "Already have an account?" }} <a href="kodulugu-user-login-page.html">{{ .Translation.Get "Log in here" }}</a></p>
+            {{ end }}
+        </div>
+    </main>
+{{ end }}
+
+{{ define "js-block" }}
+    <script src="{{ staticFileLink "kodulugu-register-validation-js" }}"></script>
+{{ end }}

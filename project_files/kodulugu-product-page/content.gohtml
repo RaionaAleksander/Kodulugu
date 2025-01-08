@@ -1,0 +1,178 @@
+{{ template "kodulugu-template-page-layout" . }}
+
+{{ define "title-block" }}
+    {{ .Translation.Get "Product" }} {{ .Data.Parameters.id }}
+{{ end }}
+
+{{ define "css-block" }}
+    <link rel="stylesheet" href="{{ "kodulugu-product-page-css" | staticFileLink }}"> 
+{{ end }}
+
+{{ define "cart-panel-block" }}
+    {{ template "kodulugu-cart-panel-partial" . }}
+{{ end }}
+
+{{ define "content-block" }}
+    <main class="main-content">
+        <div class="product-detail-container">
+
+            <input type="hidden" name="PIMApi.Api.Get.myRequestProducts" value="v1/product" data-preset-val="v1/product">
+            <input type="hidden" name="PIMApi.Api.Query.myRequestProducts.<-filter@pimFilter(id,=,number)" value="Parameters.id" data-preset-val="Parameters.id">
+
+            <input type="hidden" name="CDNApi.Api.Get.myRequestImages|1" value="images" data-preset-val="images"> 
+            <input type="hidden" name="CDNApi.Api.Query.myRequestImages.context" data-preset-val="erply-product">
+            <input type="hidden" name="CDNApi.Api.Query.myRequestImages.<-productId" data-preset-val="myRequestProducts.Response.0.id">
+            <input type="hidden" name="CDNApi.Api.Query.myRequestImages.isDeleted" data-preset-val="false">
+
+            <input type="hidden" name="PIMApi.Api.Get.myRequestCategories|1" value="v1/product/category" data-preset-val="v1/product/category">
+            <input type="hidden" name="PIMApi.Api.Query.myRequestCategories.<-filter@pimFilter(id,=,number)" data-preset-val="myRequestProducts.Response.0.category_id">
+
+            <input type="hidden" name="PIMApi.Api.Get.myRequestCountries|1" value="v1/product/country" data-preset-val="v1/product/country">
+            <input type="hidden" name="PIMApi.Api.Query.myRequestCountries.<-filter@pimFilter(id,=,number)" data-preset-val="myRequestProducts.Response.0.country_of_origin_id">
+
+            <input type="hidden" name="ErplyApi.Api.Post.getActiveLanguages" value="getActiveLanguages" data-preset-val="getActiveLanguages">
+
+            <div>
+                <div class="product-image">
+                    <img src='{{ .Session.Services.CDNApi.URL }}/images/{{ .Session.ClientCode }}/{{ .Data.CDNApi.Api.Requests.myRequestImages.Response.Get "images.0.key" }}' 
+                        alt="{{ .Data.PIMApi.Api.Requests.myRequestCategories.Response.Get "0.name.en" }} image">
+                </div>
+                <div class="product-button-go-products-container">
+                    <a class="product-button-go-products" href="kodulugu-search-product-page.html">&larr; {{ .Translation.Get "Go to products" }}</a>
+                    <!---<a class="product-button-go-products" href="javascript:window.history.back()">&larr; Go to products</a>--->
+                </div>
+            </div>
+            <div class="product-info">
+                <!---<p>{{ .Data.PIMApi.Api.Requests.myRequestProducts.Response }}</p>
+                <p>{{ .Data.PIMApi.Api.Requests.myRequestCategories.Response }}</p>
+                <p>{{ .Data.PIMApi.Api.Requests.myRequestImages.Response }}</p>
+                <p>{{ .Data.PIMApi.Api.Requests.myRequestCountries.Response }}</p>
+                --->
+
+                {{ $currentLanguageIsoCode := $.Session.Language.Code }}
+                {{ $productData := $.Data.PIMApi.Api.Requests.myRequestProducts.Response.Get "0"}}
+
+
+                {{ $productName := $productData.Get "name" }}
+
+                <h1>{{ $productName.Get $currentLanguageIsoCode }}</h1>
+                <h2><u>{{ .Translation.Get "In other languages" }}:</u></h2>
+
+                {{ range ($.Data.ErplyApi.Api.Requests.getActiveLanguages.Response.Get "records").Array }}
+                    {{ $languageIsoCode := toString (.Get "isoCode") }}
+                    {{ if not (eq $currentLanguageIsoCode $languageIsoCode)}}
+                        <p>
+                            <strong>{{ .Get "shortDisplayName" }}:</strong>
+                            &nbsp;{{ $productName.Get ($languageIsoCode) }}
+                        </p>
+                    {{ end }}
+                {{ end }}
+
+                <!---{{ if not (eq $currentLanguageIsoCode "en") }}
+                    <p><strong>ENG:</strong>&nbsp;{{ .Data.PIMApi.Api.Requests.myRequestProducts.Response.Get "0.name.en" }}</p>
+                {{ end }}
+
+                {{ if not (eq $currentLanguageIsoCode "et") }}
+                    <p><strong>EST:</strong>&nbsp;{{ .Data.PIMApi.Api.Requests.myRequestProducts.Response.Get "0.name.et" }}</p>
+                {{ end }}
+
+                {{ if not (eq $currentLanguageIsoCode "ru") }}
+                    <p><strong>RUS:</strong>&nbsp;{{ .Data.PIMApi.Api.Requests.myRequestProducts.Response.Get "0.name.ru" }}</p>
+                {{ end }}--->
+
+                <hr>
+
+                <div class="information-block">
+                    <h2><u>{{ .Translation.Get "General information" }}</u></h2>
+                    <p><strong>SKU:</strong>&nbsp;{{ $productData.Get "code" }}</p>
+                    <p><strong>EAN:</strong>&nbsp;{{ $productData.Get "code2" }}</p>
+                    <p><strong>{{ .Translation.Get "Added" }}:</strong>&nbsp;
+                        {{ unixToDate ($productData.Get "added").String (.Data.ErplyApi.ConfigurationList.timezone) "2006-02-01"}}
+                    </p>
+                    <p><strong>{{ .Translation.Get "Modified" }}:</strong>&nbsp;
+                        {{ unixToDate ($productData.Get "changed").String (.Data.ErplyApi.ConfigurationList.timezone) "2006-02-01"}}
+                    </p>
+                </div>
+
+                <div class="information-block">
+                    <details class="details-with-arrow">
+                        <summary>
+                            <h2>{{ .Translation.Get "Prices" }}</h2>
+                        </summary>
+                        <div>
+                            <p><strong>{{ .Translation.Get "Price per item" }}:</strong>&nbsp;<span id="js__product-price">{{ $productData.Get "price_with_tax" }}</span>&nbsp;<i>{{ .Translation.Get "eur" }}</i></p>
+                            <p><strong>{{ .Translation.Get "Price per item" }} {{ .Translation.Get "without tax" }}:</strong>&nbsp;<span>{{ $productData.Get "price" }}</span>&nbsp;<i>{{ .Translation.Get "eur" }}</i></p>
+                        </div>
+                    </details>
+                </div>
+
+                <div class="information-block">
+                    <details class="details-with-arrow">
+                        <summary>
+                            <h2>{{ .Translation.Get "Dimensions and Weight" }}</h2>
+                        </summary>
+                        <div>
+                            <p><strong>{{ .Translation.Get "Length" }}:</strong>&nbsp;{{ $productData.Get "length" }} <i>{{ .Translation.Get "mm" }}</i></p>
+                            <p><strong>{{ .Translation.Get "Width" }}:</strong>&nbsp;{{ $productData.Get "width" }} <i>{{ .Translation.Get "mm" }}</i></p>
+                            <p><strong>{{ .Translation.Get "Height" }}:</strong>&nbsp;{{ $productData.Get "height" }} <i>{{ .Translation.Get "mm" }}</i></p>
+                            <p><strong>{{ .Translation.Get "Weight" }}:</strong>&nbsp;{{ $productData.Get "net_weight" }} <i>{{ .Translation.Get "kg" }}</i></p>
+                        </div>
+                    </details>
+                </div>
+
+                <div class="final-information-block">
+                    <details class="details-with-arrow">
+                        <summary>
+                            <h2>{{ .Translation.Get "Other information" }}</h2>
+                        </summary>
+                        <div>
+                            <p><strong>{{ .Translation.Get "Country of origin" }}:</strong>
+                                &nbsp;{{ .Data.PIMApi.Api.Requests.myRequestCountries.Response.Get (printf "0.name.%s" $currentLanguageIsoCode) }}
+                            </p>
+                            <p><strong>{{ .Translation.Get "Category" }}:</strong>
+                                &nbsp;{{ .Data.PIMApi.Api.Requests.myRequestCategories.Response.Get (printf "0.name.%s" $currentLanguageIsoCode) }}
+                            </p>
+                        </div>
+                    </details>
+                </div>
+
+                <hr>
+
+                {{ if .Session.Customer.ID }}
+                    <h2><u>{{ .Translation.Get "Add to cart"}}</u></h2>
+                    <form id="js__purchase-form" method="post">
+                        <input type="hidden" name="InventoryDocumentsApi.Api.Post.addProduct" value="v1/shopping-cart/{cartId}/product">
+                        <input type="hidden" name="InventoryDocumentsApi.Api.Path.addProduct.cartId" value="{{ $.Data.InventoryDocumentsApi.Api.Requests.initShoppingCart.Response.Get "cartId" }}">
+                        <input type="hidden" name="InventoryDocumentsApi.Api.Json.addProduct.number.productId" value="{{ $productData.Get "id" }}">
+
+                        <div class="form-group">
+                            <label for="quantity">{{ .Translation.Get "Quantity" }}:</label>
+                            <input type="number" id="js__quantity" name="InventoryDocumentsApi.Api.Json.addProduct.number.amount" value="1" min="1" max="100">
+                        </div>
+
+                        <div class="form-group">
+                            <p>{{ .Translation.Get "Total price" }}: <span id="js__total-price">{{ $productData.Get "price_with_tax" }}</span> €</p>
+                        </div>
+
+                        <p id="js__success-message">Product successfully added to cart!</p>
+
+                        <button id="js__submit-button" class="product-submit-button" type="submit">{{ .Translation.Get "Add to cart"}}</button>
+                    </form>
+                {{ else }}
+                    <h2><u>{{ .Translation.Get "Attention!" }}</u></h2>
+                    <p>{{ .Translation.Get "If you want to buy an item, you must first register on our website." }}</p>
+                    <p>{{ .Translation.Get "Please register" }} 
+                        <a href="kodulugu-user-register-page.html">{{ .Translation.Get "here" }}</a>
+                        {{ .Translation.Get "or log in" }} 
+                        <a href="kodulugu-user-login-page.html">{{ .Translation.Get "here" }}</a>.
+                    </p>
+                {{ end }}
+            </div>
+        </div>            
+    </main>
+{{ end }}
+
+{{ define "js-block" }}
+    <script src="{{ staticFileLink "kodulugu-product-page-script-js" }}"></script>
+    <script src="{{ staticFileLink "kodulugu-browser-history-fix-js" }}"></script>
+{{ end }}

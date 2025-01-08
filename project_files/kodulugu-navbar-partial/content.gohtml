@@ -1,0 +1,64 @@
+{{ define "kodulugu-navbar-partial" }}
+    <header>
+        <img class="image-logo" src="https://res.cloudinary.com/duymcxjly/image/upload/Kodulugu-Avatar.png" alt="KoduLugu image">
+        <nav class="navigation">
+            <a href="kodulugu-home-page.html" class="link-to-page link-to-page-animated">{{ .Translation.Get "Home" }}</a>
+            <a href="kodulugu-search-product-page.html" class="link-to-page link-to-page-animated">{{ .Translation.Get "Products" }}</a>
+            <a href="kodulugu-orders-list-page.html" class="link-to-page link-to-page-animated hide-dropdown-on-low-screen">{{ .Translation.Get "Orders" }}</a>
+            
+            <input type="hidden" name="ErplyApi.Api.Post.getActiveLanguages" value="getActiveLanguages" data-preset-val="getActiveLanguages">
+            <div hidden id="js__current-lang">/{{ $.Session.Language.Code }}/</div>
+            {{ $currentLanguageIsoCode := $.Session.Language.Code }}
+
+            <div class="js__nav-dropdown">
+                <button class="js__nav-dropdown-button">
+                    <svg class="language_icon" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path fill-rule="evenodd" clip-rule="evenodd" d="M8.00004 2.66667C5.05452 2.66667 2.66671 5.05448 2.66671 8C2.66671 10.9455 5.05452 13.3333 8.00004 13.3333C10.9456 13.3333 13.3334 10.9455 13.3334 8C13.3334 5.05448 10.9456 2.66667 8.00004 2.66667ZM1.33337 8C1.33337 4.3181 4.31814 1.33334 8.00004 1.33334C11.6819 1.33334 14.6667 4.3181 14.6667 8C14.6667 11.6819 11.6819 14.6667 8.00004 14.6667C4.31814 14.6667 1.33337 11.6819 1.33337 8Z" fill="currentColor"></path>
+                        <path fill-rule="evenodd" clip-rule="evenodd" d="M6.72367 4.02812C6.28711 5.01039 6.00008 6.4141 6.00008 8C6.00008 9.58591 6.28711 10.9896 6.72367 11.9719C6.94233 12.4639 7.18542 12.8207 7.42168 13.0456C7.65451 13.2671 7.84881 13.3333 8.00008 13.3333C8.15135 13.3333 8.34565 13.2671 8.57848 13.0456C8.81474 12.8207 9.05784 12.4639 9.27649 11.9719C9.71305 10.9896 10.0001 9.58591 10.0001 8C10.0001 6.4141 9.71305 5.01039 9.27649 4.02812C9.05784 3.53615 8.81474 3.17929 8.57848 2.95444C8.34565 2.73287 8.15135 2.66667 8.00008 2.66667C7.84881 2.66667 7.65451 2.73287 7.42168 2.95444C7.18542 3.17929 6.94233 3.53615 6.72367 4.02812ZM6.5025 1.98858C6.90775 1.60292 7.41497 1.33334 8.00008 1.33334C8.58519 1.33334 9.09241 1.60292 9.49766 1.98858C9.89947 2.37097 10.231 2.89279 10.4949 3.4866C11.0235 4.67591 11.3334 6.2722 11.3334 8C11.3334 9.72781 11.0235 11.3241 10.4949 12.5134C10.231 13.1072 9.89947 13.629 9.49766 14.0114C9.09241 14.3971 8.58519 14.6667 8.00008 14.6667C7.41497 14.6667 6.90775 14.3971 6.5025 14.0114C6.10069 13.629 5.76917 13.1072 5.50526 12.5134C4.97667 11.3241 4.66675 9.72781 4.66675 8C4.66675 6.2722 4.97667 4.67591 5.50526 3.4866C5.76917 2.89279 6.10069 2.37097 6.5025 1.98858Z" fill="currentColor"></path>
+                        <path fill-rule="evenodd" clip-rule="evenodd" d="M2 10C2 9.63181 2.29848 9.33334 2.66667 9.33334L13.3333 9.33334C13.7015 9.33334 14 9.63181 14 10C14 10.3682 13.7015 10.6667 13.3333 10.6667L2.66667 10.6667C2.29848 10.6667 2 10.3682 2 10Z" fill="currentColor"></path>
+                        <path fill-rule="evenodd" clip-rule="evenodd" d="M2 6C2 5.63181 2.29848 5.33334 2.66667 5.33334L13.3333 5.33334C13.7015 5.33334 14 5.63181 14 6C14 6.36819 13.7015 6.66667 13.3333 6.66667L2.66667 6.66667C2.29848 6.66667 2 6.36819 2 6Z" fill="currentColor"></path>
+                    </svg>
+                    <span>{{ .Translation.Get "language" }}</span>
+                </button>
+                <div class="js__nav-dropdown-menu">                
+                    {{ range ($.Data.ErplyApi.Api.Requests.getActiveLanguages.Response.Get "records").Array }}
+                        {{ $languageIsoCode := toString (.Get "isoCode") }}
+                        {{ if not (eq $currentLanguageIsoCode $languageIsoCode)}}
+                            <a data-lang="{{ .Get "isoCode" }}" class="js__language-button">{{ .Get "shortDisplayName" }}</a>
+                        {{ end }}
+                    {{ end }}
+                </div>
+            </div>
+
+            <!--- {{ $.Data.ErplyApi.Api.Requests.getActiveLanguages.Response.Get "records" }}--->
+
+            {{ if .Session.Customer.ID }}
+                <div class="js__nav-dropdown user-dropdown">
+                    <button class="js__nav-dropdown-button user-name-button" onclick="toggleDropdown()">
+                        {{ .Session.Customer.FirstName }}&nbsp;{{ .Session.Customer.LastName }}
+                    </button>
+
+                    <div class="js__nav-dropdown-menu user-dropdown-menu">
+                        <a href="kodulugu-user-profile-page.html">{{ .Translation.Get "View profile" }}</a>
+                        <a href="kodulugu-calculator-page.html">{{ .Translation.Get "Calculator" }}</a>
+
+                        <form method="post">
+                            <input type="hidden" name="AutomatApi.B2BLogoutInput.Logout" value="1">
+                            <input type="hidden" name="postActionRedirect" value="kodulugu-user-login-page">
+
+                            <input type="hidden" name="AutomatApi.B2BLogoutInput.Redirect" value="kodulugu-user-login-page">
+
+                            <button type="submit" href="kodulugu-home-page.html">{{ .Translation.Get "Log Out" }}</button>
+                        </form>
+                    </div>
+                </div>
+            {{ else }}
+                <a href="kodulugu-user-login-page.html" class="btnLogin-popup">{{ .Translation.Get "Log In" }}</a>
+            {{ end }}
+
+            <script src="{{ staticFileLink "kodulugu-navbar-dropdown-js" }}"></script>
+        </nav>
+    </header>
+
+    <script src="{{ staticFileLink "kodulugu-user-change-language-automation-js" }}"></script>
+{{ end }}

@@ -1,0 +1,47 @@
+{{ template "kodulugu-template-page-layout" . }}
+
+{{ define "title-block" }}
+    {{ .Translation.Get "Calculator" }}
+{{ end }}
+
+{{ define "css-block" }}
+    <link rel="stylesheet" href="{{ "kodulugu-calculator-default-css" | staticFileLink }}">
+{{ end }}
+
+{{ define "cart-panel-block" }}
+    {{ template "kodulugu-cart-panel-partial" . }}
+{{ end }}
+
+{{ define "content-block" }}
+    <main class="main-content">
+        <div id="calculator">
+            <div class="top">
+                <span class="clear">C</span>
+                <div class="screen" id="screenc"></div>
+            </div>
+            
+            <div class="keys">
+                <span>7</span>
+                <span>8</span>
+                <span>9</span>
+                <span class="operator">+</span>
+                <span>4</span>
+                <span>5</span>
+                <span>6</span>
+                <span class="operator">-</span>
+                <span>1</span>
+                <span>2</span>
+                <span>3</span>
+                <span class="operator">÷</span>
+                <span>0</span>
+                <span>.</span>
+                <span class="eval">=</span>
+                <span class="operator">x</span>
+            </div>
+        </div>
+    </main>
+{{ end }}
+
+{{ define "js-block" }}
+    <script src="{{ staticFileLink "kodulugu-calculator-default-js" }}"></script>
+{{ end }}

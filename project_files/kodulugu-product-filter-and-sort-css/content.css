@@ -1,0 +1,114 @@
+.filter-sort-panel {
+    margin-top: 10px;
+    background-color: #fff;
+    border-radius: 8px;
+}
+
+.toggle-section label {
+    display: block;
+    margin: 5px 0;
+    color: #292929;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.hidden {
+    display: none;
+}
+
+.sort-section, .filter-section {
+    margin: 0 -11px;
+    padding: 1px 10px 10px 10px;
+    background-color: #cbcbcb;
+    border-radius: 6px;
+}
+
+.sort-section label,
+.filter-section label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.sort-section select,
+.price-inputs input,
+.name-filter input {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: #f9f9f9;
+    font-size: 14px;
+}
+
+.price-filter {
+    margin-bottom: 20px;
+}
+
+.slider-container {
+    position: relative;
+    width: 100%;
+    height: 5px;
+    background-color: #ddd;
+    margin: 10px 0;
+}
+
+.slider-container input[type="range"] {
+    position: absolute;
+    width: 100%;
+    height: 5px;
+    appearance: none;
+    background: transparent;
+    pointer-events: none;
+}
+
+.slider-container input[type="range"]::-webkit-slider-thumb {
+    appearance: none;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background-color: #28a745;
+    pointer-events: auto;
+}
+
+.price-inputs {
+    display: flex;
+    justify-content: space-between;
+}
+
+.price-inputs input {
+    width: 48%;
+}
+
+.category-filter {
+    margin-bottom: 20px;
+}
+
+.category-filter div {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.category-filter label {
+    width: 50%;
+    color: #333;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.apply-filter-btn {
+    width: 100%;
+    padding: 10px;
+    background-color: #28a745;
+    border: none;
+    border-radius: 4px;
+    color: white;
+    font-weight: bold;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.apply-filter-btn:hover {
+    background-color: #218838;
+}

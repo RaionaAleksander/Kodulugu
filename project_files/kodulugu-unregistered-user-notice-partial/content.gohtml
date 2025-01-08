@@ -1,0 +1,13 @@
+{{ define "kodulugu-unregistered-user-notice-partial" }}
+    <main class="unregistered-context">
+        <div class="unregistered-user-notice">
+            <img src="https://res.cloudinary.com/duymcxjly/image/upload/v1729099451/Kurb_emoji_varvita.png" alt="Sad_emoji">
+            <p>{{ .Translation.Get "You are not a registered user!" }}</p>
+            <p>{{ .Translation.Get "Please register" }} 
+                <a href="kodulugu-user-register-page.html">{{ .Translation.Get "here" }}</a> 
+                {{ .Translation.Get "or log in" }} 
+                <a href="kodulugu-user-login-page.html">{{ .Translation.Get "here" }}</a>.
+            </p>
+        </div>
+    </main>
+{{ end }}

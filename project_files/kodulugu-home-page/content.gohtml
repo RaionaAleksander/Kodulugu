@@ -1,0 +1,180 @@
+{{ template "kodulugu-template-page-layout" . }}
+
+{{ define "title-block" }}
+    Kodulugu
+{{ end }}
+
+{{ define "css-block" }}
+    <link rel="stylesheet" href="{{ "kodulugu-carousel-products-css" | staticFileLink }}">
+    <link rel="stylesheet" href="{{ "kodulugu-product-list-css" | staticFileLink }}">
+    <link rel="stylesheet" href="{{ "kodulugu-home-css" | staticFileLink }}">
+{{ end }}
+
+{{ define "cart-panel-block" }}
+    {{ template "kodulugu-cart-panel-partial" . }}
+{{ end }}
+
+{{ define "content-block" }}
+    <main class="main-content">
+
+        <section class="section-container text-image-section">
+            <div class="text-container">
+                <h1>KoduLugu</h1>
+
+                <p>{{ .Translation.Get "KoduLugu is an online furniture store that helps you create a cozy and stylish environment at home." }}</p>
+                <br>
+                <p>{{ .Translation.Get "With us, you will find unique solutions for every room, from modern to classic designs." }}</p>
+            </div>
+            <div class="image-container">
+                <img class="image-object" src="https://res.cloudinary.com/duymcxjly/image/upload/Kodulugu-Avatar.png" alt="KoduLugu image">
+            </div>
+        </section>
+
+        {{ $currentName := printf "name.%s" $.Session.Language.Code }}
+
+        <input type="hidden" name="PIMApi.Api.Get.myRequestProducts" value="v1/product" data-preset-val="v1/product">
+        <input type="hidden" name="PIMApi.Api.Get.myRequestCategories" value="v1/product/category" data-preset-val="v1/product/category">
+
+        <input type="hidden" name="CDNApi.Api.Get.myRequestImages" value="images" data-preset-val="images">
+        <input type="hidden" name="CDNApi.Api.Query.myRequestImages.context" data-preset-val="erply-product">
+
+        <input type="hidden" name="CustomApi.Api.Get.myRequestRandomNumbers"
+        value="http://www.randomnumberapi.com/api/v1.0/random?min=1&max=20&count=10"
+        data-preset-val="http://www.randomnumberapi.com/api/v1.0/random?min=1&max=20&count=10">
+
+        {{ $randomNumbers := .Data.CustomApi.Api.Requests.myRequestRandomNumbers.Response.Array }}
+
+        {{ $uniqueNumbers := "" }}
+
+        {{ range $i, $num := $randomNumbers }}
+            {{ $numStr := printf "%v" $num }}
+
+            {{ if not (isInStringArray $numStr (split $uniqueNumbers ",")) }}
+                {{ if eq $uniqueNumbers "" }}
+                    {{ $uniqueNumbers = $numStr }}
+                {{ else }}
+                    {{ $uniqueNumbers = printf "%s,%s" $uniqueNumbers $numStr }}
+                {{ end }}
+            {{ end }}
+        {{ end }}
+
+        <!---<ul>
+            {{ $randomNumbers }}
+            {{ $uniqueNumbers }}
+            {{ range $num := (split $uniqueNumbers ",") }}
+                <li>{{ $num }}</li>
+            {{ end }}
+        </ul>--->
+
+        <section class="carousel-container">
+            <div class="carousel-title">
+                <h2>{{ .Translation.Get "Random products" }} </h2>
+            </div>
+            <div class="carousel-wrapper">
+                <button class="carousel-button left" id="prevButton">&#9664;</button>
+                <div class="carousel-track-container">
+                    <div class="carousel-track" id="carouselTrack">
+                        {{ range $number := (split $uniqueNumbers ",") }}
+                            {{ if $number }}
+                                {{ $categoryID := "" }}
+                                {{ $productID := "" }}
+
+                                {{ $productName := "" }}
+                                {{ $productPrice := "" }}
+
+                                {{ range $.Data.PIMApi.Api.Requests.myRequestProducts.Response.Array }}
+                                    {{ if eq (.Get "id").Int (toInt $number) }}
+                                        {{ $categoryID = .Get "category_id"}}
+                                        {{ $productID = .Get "id" }}
+                                        {{ $productName = .Get $currentName }} <!--- key variable -->
+                                        {{ $productPrice = .Get "price" }}
+                                    {{ end }}
+                                {{ end }}
+
+                                {{ $categoryName := "" }}
+                                {{ $imageKey := "" }}
+
+                                {{ range $.Data.PIMApi.Api.Requests.myRequestCategories.Response.Array }}
+                                    {{ if eq (.Get "id").Int $categoryID.Int }}
+                                        {{ $categoryName = .Get "name.et" }}
+                                    {{ end }}
+                                {{ end }}
+
+                                {{ with $.Data.CDNApi.Api.Requests.myRequestImages.Response }}
+                                    {{ range (.Get "images").Array }}
+                                        {{ if eq (.Get "productId").Int $productID.Int }}
+                                            {{ $imageKey = .Get "key" }}
+                                        {{ end }}
+                                    {{ end }}
+                                {{ end }}
+
+                                {{ template "kodulugu-carousel-product-item-partial" mkMap
+                                    "id" (toString $productID)
+                                    "image" (toString $categoryName)
+                                    "name" (toString $productName)
+                                    "price" (toString $productPrice)
+                                    "imageKey" (toString $imageKey)
+                                    "cdnURL" $.Session.Services.CDNApi.URL
+                                    "clientCode" (printf "%d" $.Session.ClientCode)
+                                    "price_name" ($.Translation.Get "Price") }}
+                            {{ end }}
+                        {{ end }}
+                    </div>
+                </div>
+                <button class="carousel-button right" id="nextButton">&#9654;</button>
+            </div>
+        </section>
+
+        <section class="section-container">
+            <h2>Esimesed kaubad</h2>
+            <div class="product-list">
+                {{ with .Data.PIMApi.Api.Requests.myRequestProducts.Response.Array }}
+                    {{ $maxItems := 5 }}
+                    {{ $counter := 0 }}
+                    {{ range . }}
+                        {{ if lt (toInt $counter) $maxItems }}
+                            {{ $categoryID := .Get "category_id"}}
+                            {{ $categoryName := "" }}
+                            {{ range $.Data.PIMApi.Api.Requests.myRequestCategories.Response.Array }}
+                                {{ if eq (.Get "id").Int $categoryID.Int }}
+                                    {{ $categoryName = .Get "name.et" }}
+                                {{ end }}
+                            {{ end }}
+                            {{ $productID := .Get "id" }}
+                            {{ $imageKey := "" }}
+                            {{ with $.Data.CDNApi.Api.Requests.myRequestImages.Response }}
+                                {{ range (.Get "images").Array }}
+                                    {{ if eq (.Get "productId").Int $productID.Int }}
+                                        {{ $imageKey = .Get "key" }}
+                                    {{ end }}
+                                {{ end }}
+                            {{ end }}
+
+                            {{ template "kodulugu-product-item-partial" mkMap
+                                "id" $productID.String
+                                "image" $categoryName.String
+                                "name" (.Get $currentName).String
+                                "price" (.Get "price").String
+                                "imageKey" $imageKey.String
+                                "cdnURL" $.Session.Services.CDNApi.URL
+                                "clientCode" (printf "%d" $.Session.ClientCode)
+                                "price_name" ($.Translation.Get "Price") }}
+                            {{ $counter = add $counter 1 }}
+                        {{ end }}
+                    {{ end }}
+                {{ end }}
+            </div>
+        </section>
+
+        <script src="{{ staticFileLink "kodulugu-carousel-products-js" }}"></script>
+
+        <div class="section-container button-container">
+            <a href="kodulugu-search-product-page.html" class="library-button">{{ .Translation.Get "View other products" }}</a>
+        </div>
+
+    </main>
+{{ end }}
+
+{{ define "js-block" }}
+    <script src="{{ staticFileLink "kodulugupood-carousel-products-js" }}"></script>
+{{ end }}

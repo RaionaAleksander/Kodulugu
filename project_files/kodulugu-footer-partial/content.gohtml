@@ -1,0 +1,13 @@
+{{ define "kodulugu-footer-partial" }}
+    <footer class="footer">
+        <div class="footer-container">
+            <p>&copy; 2024 Kodulugu. {{ .Translation.Get "All rights reserved." }}</p>
+            <ul class="footer-links">
+                <li><a href="about-page.html">{{ .Translation.Get "About Us" }}</a></li>
+                <li><a href="contact-page.html">{{ .Translation.Get "Contact" }}</a></li>
+                <li><a href="privacy-page.html">{{ .Translation.Get "Privacy Policy" }}</a></li>
+                <li><a href="terms-page.html">{{ .Translation.Get "Terms of Use" }}</a></li>
+            </ul>
+        </div>
+    </footer>
+{{ end }}

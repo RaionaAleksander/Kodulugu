@@ -1,0 +1,166 @@
+{{ template "kodulugu-template-page-layout" . }}
+
+{{ define "title-block" }}
+    {{ .Translation.Get "Products" }}
+{{ end }}
+
+{{ define "css-block" }}
+    <link rel="stylesheet" href="{{ "kodulugu-product-list-css" | staticFileLink }}">
+    <link rel="stylesheet" href="{{ "kodulugu-search-product-css" | staticFileLink }}">
+{{ end }}
+
+{{ define "cart-panel-block" }}
+    {{ template "kodulugu-cart-panel-partial" . }}
+{{ end }}
+
+{{ define "content-block" }}
+    <main class="main-content"> 
+        <input type="hidden" name="PIMApi.Api.Get.myRequestProductsLookUp" value="v1/product/full-text-lookup" data-preset-val="v1/product/full-text-lookup">
+        <input type="hidden" name="PIMApi.Api.Query.myRequestProductsLookUp.<-lookupPhrase" data-preset-val="Parameters.search">
+
+        <input type="hidden" name="PIMApi.Api.Get.myRequestFilterProducts|1" value="v1/product" data-preset-val="v1/product">
+        <input type="hidden" name="PIMApi.Api.Query.myRequestFilterProducts.<-?filter@pimFilter(price,>=,number)" data-preset-val="Parameters.price_from">
+        <input type="hidden" name="PIMApi.Api.Query.myRequestFilterProducts.<-?filter@pimFilter(price,<=,number)" data-preset-val="Parameters.price_to">
+        <input type="hidden" name="PIMApi.Api.Query.myRequestFilterProducts.<-?filter@pimFilter(id,in,number)" data-preset-val="myRequestProductsLookUp.Response.#.id|@commaSepStr">
+
+        <!--- <input type="hidden" name='PIMApi.Api.Query.getFilterGroups.<-sort@{prefix({"language":)}' data-preset-val='Session.language.Code|@suffix:,"desc":false,"selector":"name"}'> --->
+
+        <input type="hidden" name="PIMApi.Api.Get.myRequestProductsForAlgorithm" value="v1/product" data-preset-val="v1/product">
+
+        {{ $priceFrom := 9999.99 }}
+        {{ $priceTo := 0.00 }}
+
+        {{ with .Data.PIMApi.Api.Requests.myRequestProductsForAlgorithm.Response.Array }}
+            {{ range . }}
+                {{ $currentPrice := (.Get "price").Float }}
+                
+                {{ if gt $priceFrom $currentPrice }}
+                    {{ $priceFrom = $currentPrice }}
+                {{ end }}
+                
+                {{ if lt $priceTo $currentPrice }}
+                    {{ $priceTo = $currentPrice }}
+                {{ end }}
+            {{ end }}
+        {{ end }}
+
+        {{ $dataPriceFrom := toFloat .Data.Parameters.price_from }}
+        {{ $dataPriceTo := toFloat .Data.Parameters.price_to }}
+
+        {{ if and $dataPriceTo (gt $dataPriceFrom $dataPriceTo) }}
+            {{ $dataPriceFrom = $priceFrom }}
+            {{ $dataPriceTo = $priceTo }}
+        {{ end }}
+
+        {{ $dataSearch := .Data.Parameters.search }}
+
+        <input type="hidden" name="PIMApi.Api.Get.myRequestCategories|1" value="v1/product/category" data-preset-val="v1/product/category">
+
+        <input type="hidden" name="CDNApi.Api.Get.myRequestImages|1" value="images" data-preset-val="images">
+
+        {{ $currentName := printf "name.%s" $.Session.Language.Code }}
+
+        <div class="products-detail-container">
+            <div class="filter-container">
+                <div class="filter-header">
+                    <h2>{{ .Translation.Get "Filter" }}</h2>
+                </div>
+                <div class="filter-content">
+                    <div class="name-filter">
+                        <label for="name-input">{{ .Translation.Get "Filter by Name" }}:</label>
+                        <input type="text" id="js__name-input" placeholder="{{ .Translation.Get "Enter product name" }}" 
+                        value="{{ if $dataSearch }}{{ $dataSearch }}{{ else }}{{ end }}"
+                        >
+                        <p id="js__name-warning" class="warning_text">{{ .Translation.Get "Enter at least 3 characters" }}</p>
+                    </div>
+                    <div class="price-filter">
+                        <label for="min-price">{{ .Translation.Get "Filter by Price" }}:</label>
+                        <div class="slider-container">
+                            <input type="range" 
+                            min="{{ $priceFrom }}"
+                            max="{{ $priceTo }}"
+                            step="0.01"
+                            value="{{ if $dataPriceFrom }}{{ if gt (toFloat $dataPriceFrom) $priceFrom}}{{ $dataPriceFrom }}{{ else }}{{ $priceFrom }}{{ end }}{{ else }}{{ $priceFrom }}{{ end }}" 
+                            id="js__min-slider">
+                            <input type="range" 
+                            min="{{ $priceFrom }}" 
+                            max="{{ $priceTo }}"
+                            step="0.01" 
+                            value="{{ if $dataPriceTo }}{{ if lt (toFloat $dataPriceTo) $priceTo}}{{ $dataPriceTo }}{{ else }}{{ $priceTo }}{{ end }}{{ else }}{{ $priceTo }}{{ end }}"
+                            id="js__max-slider">
+                        </div>
+                        <div class="price-inputs">
+                            <input type="number" id="js__min-price" 
+                            value="{{ if $dataPriceFrom }}{{ if gt (toFloat $dataPriceFrom) $priceFrom}}{{ $dataPriceFrom }}{{ else }}{{ $priceFrom }}{{ end }}{{ else }}{{ $priceFrom }}{{ end }}"  
+                            min="{{ $priceFrom }}" 
+                            max="{{ $priceTo }}"
+                            step="0.01"
+                            >
+                            <input type="number" id="js__max-price" 
+                            value="{{ if $dataPriceTo }}{{ if lt (toFloat $dataPriceTo) $priceTo}}{{ $dataPriceTo }}{{ else }}{{ $priceTo }}{{ end }}{{ else }}{{ $priceTo }}{{ end }}" 
+                            min="{{ $priceFrom }}"
+                            max="{{ $priceTo }}"
+                            step="0.01"
+                            >
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{ $dataSortList := .Data.Parameters.product_list_order }}
+
+            <div class="products-container">
+                <div class="products-header">
+                    <h2>{{ .Translation.Get "Goods" }}</h2>
+                    <select id="js__product-order" class="product-order-selector">
+                        <option value="" {{ if eq $dataSortList "" }}selected{{ end }}>Default</option>
+                        <option value="price-asc" {{ if eq $dataSortList "price-asc" }}selected{{ end }}>By price (ascending)</option>
+                        <option value="price-desc" {{ if eq $dataSortList "price-desc" }}selected{{ end }}>By price (decreasing)</option>
+                        <option value="name-asc" {{ if eq $dataSortList "name-asc" }}selected{{ end }}>By name (A-Z)</option>
+                        <option value="name-desc" {{ if eq $dataSortList "name-desc" }}selected{{ end }}>By name (Z-A)</option>
+                    </select>
+                </div>
+                <hr>
+                <div class="product-list">
+                    {{ with .Data.PIMApi.Api.Requests.myRequestFilterProducts.Response.Array }}
+                            {{ range . }}
+                                {{ $categoryID := .Get "category_id"}}
+                                {{ $categoryName := "" }}
+
+                                {{ range $.Data.PIMApi.Api.Requests.myRequestCategories.Response.Array }}
+                                    {{ if eq (.Get "id").Int $categoryID.Int}}
+                                        {{ $categoryName = .Get "name.et" }}
+                                    {{ end }}
+                                {{ end }}
+
+                                {{ $productID := .Get "id" }}
+                                {{ $imageKey := "" }}
+
+                                {{ with $.Data.CDNApi.Api.Requests.myRequestImages.Response }}
+                                    {{ range (.Get "images").Array }}
+                                        {{ if eq (.Get "productId").Int $productID.Int }}
+                                            {{ $imageKey = .Get "key" }}
+                                        {{ end }}
+                                    {{ end }}
+                                {{ end }}
+
+                                {{ template "kodulugu-product-item-partial" mkMap 
+                                    "id" $productID.String
+                                    "image" $categoryName.String
+                                    "name" (.Get $currentName).String
+                                    "price" (.Get "price").String
+                                    "imageKey" $imageKey.String
+                                    "cdnURL" $.Session.Services.CDNApi.URL
+                                    "clientCode" (printf "%d" $.Session.ClientCode)
+                                    "price_name" ($.Translation.Get "Price") }}
+                            {{ end }}
+                    {{ end }}
+                </div>
+            </div>
+        </div>
+    </main>
+{{ end }}
+
+{{ define "js-block" }}
+    <script src="{{ staticFileLink "kodulugu-products-sort-and-filter-js" }}"></script>
+{{ end }}

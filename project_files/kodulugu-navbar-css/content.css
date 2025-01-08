@@ -1,0 +1,244 @@
+/* Navbar */
+header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 80px;
+    padding: 20px 100px;
+    background-color: peachpuff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 1000;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.image-logo {
+    height: 66px;
+    width: auto;
+}
+
+.navigation {
+    display: flex;
+    align-items: center;
+    gap: 40px;
+}
+
+.navigation .link-to-page {
+    position: relative;
+    font-size: 1.1em;
+    color: rgb(40, 40, 40);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.navigation .link-to-page-animated::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -6px;
+    width: 100%;
+    height: 3px;
+    background-color: rgb(40, 40, 40);
+    border-radius: 5px;
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform .5s ease;
+}
+
+.navigation .link-to-page-animated:hover::after {
+    transform: scaleX(1);
+    transform-origin: left;
+}
+
+.navigation .btnLogin-popup {
+    padding: 10px 20px;
+    border: 2px solid rgb(40, 40, 40);
+    outline: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1.1em;
+    color: rgb(40, 40, 40);
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.navigation .btnLogin-popup:hover {
+    background: rgb(40, 40, 40);
+    color: antiquewhite;
+}
+
+.js__nav-dropdown-button {
+    padding: 10px 0;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    color: rgb(40, 40, 40);
+    font-weight: 500;
+    font-size: 1.1em;
+    white-space: nowrap;
+}
+
+.js__nav-dropdown-button:hover {
+    color: rgb(13, 20, 65);
+}
+
+.js__nav-dropdown-menu {
+    display: none;
+    position: absolute;
+    background-color: rgb(40, 40, 40);
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+    z-index: 1;
+    border: 1px solid rgb(40, 40, 40);
+}
+
+.js__nav-dropdown-menu a, .js__nav-dropdown-menu button {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    text-decoration: none;
+    color: antiquewhite;
+    background-color: rgb(60, 60, 60);
+    border: 2px solid rgb(40, 40, 40);
+    text-align: left;
+    font-size: 1.1em;
+    cursor: pointer;
+    transition: .5s ease;
+    font-family: inherit;
+}
+
+.js__nav-dropdown-menu a:hover, .js__nav-dropdown-menu button:hover {
+    background-color: peachpuff;
+    color: rgb(60, 60, 60);
+}
+
+.js__nav-dropdown-menu.show {
+    display: block;
+}
+
+.user-dropdown {
+    position: relative; 
+}
+
+.user-name-button {
+    color: black;
+    font-weight: 600;
+}
+
+.user-dropdown-menu {
+    right: 0;
+}
+
+.language_icon {
+    vertical-align: middle;
+    margin-top: -2px;
+}
+
+
+/* Adaptiivsus */
+
+@media (max-width: 1200px) {
+    header {
+        height: 74px;
+        padding: 10px 60px;
+    }
+
+    .navigation {
+        gap: 30px;
+    }
+
+    .image-logo {
+        height: 60px;
+    }
+
+    .navigation .link-to-page, .navigation .btnLogin-popup
+    , .navigation .LogIn-name, .navigation .js__nav-dropdown {
+        font-size: 1.0em;
+    }
+
+    .navigation .btnLogin-popup {
+        padding: 8px 16px;
+    }
+
+    .main-content {
+        padding-top: 74px;
+    }
+}
+
+@media (max-width: 1020px) {
+    header {
+        height: 68px;
+        padding: 10px 40px;
+    }
+
+    .navigation {
+        gap: 20px;
+    }
+
+    .image-logo {
+        height: 56px;
+    }
+
+    .navigation .link-to-page, .navigation .btnLogin-popup
+    , .navigation .LogIn-name, .navigation .js__nav-dropdown {
+        font-size: 0.9em;
+    }
+
+    .navigation .btnLogin-popup {
+        padding: 6px 12px;
+    }
+
+    .main-content {
+        padding-top: 68px;
+    }
+}
+
+@media (max-width: 840px) {
+    header {
+        height: 50px;
+        padding: 10px 10px;
+    }
+
+    .image-logo {
+        height: 36px;
+    }
+
+    .navigation .link-to-page, .navigation .btnLogin-popup
+    , .navigation .LogIn-name, .navigation .js__nav-dropdown {
+        font-size: 0.75em;
+    }
+
+    .js__nav-dropdown-menu a, .js__nav-dropdown-menu button {
+        font-size: 1.0em;
+    }
+
+    .navigation .hide-dropdown-on-low-screen {
+        display: none;
+    }
+
+    .main-content {
+        padding-top: 50px;
+    }
+}
+
+@media (max-width: 500px) {
+    .js__nav-dropdown-button:hover {
+        color: rgb(40, 40, 40);
+    }
+
+    .navigation .btnLogin-popup:hover {
+        background-color: peachpuff;
+        color: rgb(40, 40, 40);
+    }
+
+    .navigation .link-to-page-animated:hover::after {
+        transform: scaleX(0);
+        transition: none;
+    }
+
+    .js__nav-dropdown-menu a:hover, .js__nav-dropdown-menu button:hover {
+        background-color: rgb(60, 60, 60);
+        color: antiquewhite;
+    }
+}
